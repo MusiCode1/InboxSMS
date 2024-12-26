@@ -1,15 +1,23 @@
 import type { Actions, PageServerLoad } from './$types';
 import type { Message, LoginResponse, MessagesResponse } from '$lib/types';
+import { env } from '$env/dynamic/private';
 
-const API_URL = 'https://www.call2all.co.il/ym/api/';
+const API_URL = env.API_URL || 'https://www.call2all.co.il/ym/api/';
+const API_USERNAME = env.API_USERNAME;
+const API_PASSWORD = env.API_PASSWORD;
+const CLIENT_USERNAME = env.CLIENT_USERNAME;
+const CLIENT_PASSWORD = env.CLIENT_PASSWORD;
 
-async function loginToApi(username: string, password: string): Promise<string> {
+async function loginToApi(): Promise<string> {
     const response = await fetch(`${API_URL}Login`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ 
+            username: API_USERNAME,
+            password: API_PASSWORD
+        })
     });
 
     const data: LoginResponse = await response.json();
@@ -17,7 +25,7 @@ async function loginToApi(username: string, password: string): Promise<string> {
     if (data.responseStatus === 'OK' && data.token) {
         return data.token;
     }
-
+    
     throw new Error(data.message || 'שגיאה בהתחברות');
 }
 
@@ -27,7 +35,7 @@ async function getMessagesFromApi(token: string): Promise<Message[]> {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
+        body: JSON.stringify({ 
             token,
             limit: 100
         })
@@ -38,7 +46,7 @@ async function getMessagesFromApi(token: string): Promise<Message[]> {
     if (data.responseStatus === 'OK' && data.rows) {
         return data.rows;
     }
-
+    
     throw new Error(data.message || 'שגיאה בטעינת ההודעות');
 }
 
@@ -69,7 +77,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
         return {
             messages
         };
-    } catch (error: unknown) {
+    } catch (error) {
         cookies.delete('session', { path: '/' });
         return {
             messages: []
@@ -90,8 +98,16 @@ export const actions: Actions = {
             };
         }
 
+        // בדיקת פרטי התחברות
+        if (username !== CLIENT_USERNAME || password !== CLIENT_PASSWORD) {
+            return {
+                success: false,
+                error: 'שם משתמש או סיסמה שגויים'
+            };
+        }
+
         try {
-            const token = await loginToApi(username, password);
+            const token = await loginToApi();
             cookies.set('session', token, { path: '/' });
             return { success: true };
         } catch (error) {
