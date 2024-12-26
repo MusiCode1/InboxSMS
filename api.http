@@ -1,7 +1,0 @@
-POST https://www.call2all.co.il/ym/api/GetSmsIncomingLog
-Content-Type: application/json
-
-{
-    "token":"Jrz6NIp6ytay9XAu",
-    "limit": 10
-}
