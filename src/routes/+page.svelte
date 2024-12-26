@@ -1,44 +1,30 @@
 <script lang="ts">
-    import { login, logout, getMessages } from '$lib/api';
     import MessageList from '$lib/components/MessageList.svelte';
+    import type { PageData } from './$types';
+    import { enhance } from '$app/forms';
     import type { Message } from '$lib/types';
     
-    let token = $state<string | null>(null);
-    let messages = $state<Message[]>([]);
-    let username = $state('');
-    let password = $state('');
+    const { data } = $props<{ data: PageData }>();
     let error = $state('');
+    let messages = $state<Message[]>([]);
 
-    async function handleLogin() {
-        if (!username || !password) {
-            error = 'נא להזין שם משתמש וסיסמה';
-            return;
-        }
+    $effect(() => {
+        messages = data.messages;
+    });
 
-        try {
+    function handleLoginResult({ type, data: resultData }: { type: string; data?: any }) {
+        if (type === 'success') {
             error = '';
-            token = await login(username, password);
-            await loadMessages();
-        } catch (err) {
-            error = err instanceof Error ? err.message : 'שגיאה בהתחברות';
+        } else if (resultData?.error) {
+            error = resultData.error;
         }
     }
 
-    async function handleLogout() {
-        if (token) {
-            await logout(token);
-            token = null;
-            messages = [];
-        }
-    }
-
-    async function loadMessages() {
-        if (!token) return;
-
-        try {
-            messages = await getMessages(token);
-        } catch (err) {
-            error = err instanceof Error ? err.message : 'שגיאה בטעינת ההודעות';
+    async function handleRefreshResult(result: { success: boolean; error?: string; messages?: Message[] }) {
+        if (result.success && result.messages) {
+            messages = result.messages;
+        } else if (result.error) {
+            error = result.error;
         }
     }
 </script>
@@ -46,7 +32,7 @@
 <div class="container mx-auto px-4 py-8 max-w-3xl">
     <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">הודעות SMS נכנסות</h1>
     
-    {#if !token}
+    {#if !data.messages.length}
         <div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
             <h2 class="text-xl font-semibold mb-4 text-gray-700">התחברות</h2>
             
@@ -57,10 +43,13 @@
             {/if}
             
             <form 
+                method="POST"
+                action="?/login"
                 class="space-y-4"
-                onsubmit={(e) => {
-                    e.preventDefault();
-                    handleLogin();
+                use:enhance={({ formElement, formData }) => {
+                    return async ({ result }) => {
+                        handleLoginResult(result);
+                    };
                 }}
             >
                 <div>
@@ -70,7 +59,7 @@
                     <input
                         type="text"
                         id="username"
-                        bind:value={username}
+                        name="username"
                         placeholder="הכנס שם משתמש"
                         autocomplete="username"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -84,7 +73,7 @@
                     <input
                         type="password"
                         id="password"
-                        bind:value={password}
+                        name="password"
                         placeholder="הכנס סיסמה"
                         autocomplete="current-password"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -101,9 +90,25 @@
         </div>
     {:else}
         <MessageList
-            {messages}
-            onRefresh={loadMessages}
-            onLogout={handleLogout}
+            messages={messages}
+            onRefresh={async () => {
+                const response = await fetch('?/refresh', { 
+                    method: 'POST',
+                    headers: {
+                        'accept': 'application/json'
+                    }
+                });
+                const result = await response.json();
+                handleRefreshResult(result);
+            }}
+            onLogout={async () => {
+                await fetch('?/logout', { 
+                    method: 'POST',
+                    headers: {
+                        'accept': 'application/json'
+                    }
+                });
+            }}
         />
     {/if}
 </div>

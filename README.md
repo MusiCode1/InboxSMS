@@ -1,38 +1,96 @@
-# sv
+# פרוייקט InboxSMS - מערכת לניהול הודעות SMS נכנסות
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+## טכנולוגיות
+- **Frontend Framework**: SvelteKit 2 עם Svelte 5
+- **Styling**: TailwindCSS
+- **Type Safety**: TypeScript
+- **API Integration**: Fetch API
+- **State Management**: Svelte 5 Runes ($state)
 
-## Creating a project
+## מבנה הפרוייקט
 
-If you're seeing this, you've probably already done this step. Congrats!
+### src/lib/api.ts
+מכיל את כל הלוגיקה של קריאות ה-API:
+- `login(username: string, password: string)` - התחברות למערכת וקבלת טוקן
+- `logout(token: string)` - התנתקות מהמערכת
+- `getMessages(token: string)` - קבלת הודעות SMS
+כל הפונקציות מתקשרות עם השרת בכתובת `https://www.call2all.co.il/ym/api/`
 
-```bash
-# create a new project in the current directory
-npx sv create
+### src/lib/types.ts
+הגדרות טיפוסים עבור TypeScript:
+- `Message` - מבנה של הודעת SMS (תאריך, שולח, תוכן, נמען)
+- `LoginResponse` - מבנה של תשובת שרת להתחברות
+- `MessagesResponse` - מבנה של תשובת שרת לבקשת הודעות
 
-# create a new project in my-app
-npx sv create my-app
-```
+### src/lib/components/
+קומפוננטות משנה של האפליקציה:
 
-## Developing
+#### Message.svelte
+קומפוננטה להצגת הודעת SMS בודדת:
+- מקבלת כ-prop את פרטי ההודעה
+- מציגה תאריך, שולח, תוכן ונמען
+- מעוצבת עם TailwindCSS בצורה נקייה ומרווחת
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+#### MessageList.svelte
+קומפוננטה להצגת רשימת הודעות:
+- מקבלת כ-props את רשימת ההודעות ופונקציות לרענון והתנתקות
+- מציגה כפתורי פעולה (רענון והתנתקות)
+- מרנדרת את כל ההודעות באמצעות קומפוננטת Message
 
-```bash
-npm run dev
+### src/routes/
+הדפים והניתוב של האפליקציה:
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+#### +layout.svelte
+תבנית הבסיס של האפליקציה:
+- מייבאת את קובץ ה-CSS הראשי
+- מגדירה את כיוון הטקסט לימין לשמאל (RTL)
+- מגדירה צבע רקע בסיסי
 
-## Building
+#### +page.svelte
+הדף הראשי של האפליקציה:
+- מנהל את מצב ההתחברות באמצעות $state
+- מציג טופס התחברות או רשימת הודעות בהתאם למצב
+- מטפל בשגיאות ומציג הודעות למשתמש
 
-To create a production version of your app:
+## ניהול State
+- שימוש ב-$state של Svelte 5 לניהול משתנים ריאקטיביים:
+  - `token` - טוקן ההתחברות
+  - `messages` - רשימת ההודעות
+  - `username/password` - פרטי התחברות
+  - `error` - הודעות שגיאה
 
-```bash
-npm run build
-```
+## פונקציונליות
+1. **התחברות**:
+   - טופס עם שדות שם משתמש וסיסמה
+   - תמיכה ב-autocomplete
+   - הצגת שגיאות התחברות
+   - שמירת טוקן בזיכרון
 
-You can preview the production build with `npm run preview`.
+2. **הצגת הודעות**:
+   - טעינה אוטומטית בהתחברות
+   - תצוגה מאורגנת ונקייה
+   - מידע מלא על כל הודעה
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+3. **רענון הודעות**:
+   - כפתור לטעינה מחדש
+   - עדכון אוטומטי של התצוגה
+
+4. **התנתקות**:
+   - ניקוי טוקן וזיכרון
+   - חזרה למסך התחברות
+
+## אבטחה
+- שימוש בטוקן לאימות בקשות
+- הצפנת סיסמה בתצוגה
+- ניקוי נתונים בהתנתקות
+
+## עיצוב
+- שימוש ב-TailwindCSS לעיצוב מודרני ונקי
+- תמיכה מלאה בעברית ו-RTL
+- ממשק משתמש אינטואיטיבי
+- התאמה למובייל (responsive)
+
+## הוראות הרצה
+1. התקנת תלויות: `npm install`
+2. הרצת שרת פיתוח: `npm run dev`
+3. גישה לאפליקציה בדפדפן: `http://localhost:5173` (או פורט אחר שיוקצה)

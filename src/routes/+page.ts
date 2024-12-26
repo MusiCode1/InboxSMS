@@ -1,3 +1,12 @@
-// since there's no dynamic data here, we can prerender
-// it so that it gets served as a static asset in production
-export const prerender = true;
+import type { PageLoad } from './$types';
+import type { Message } from '$lib/types';
+
+export interface PageData {
+    messages: Message[];
+}
+
+export const load: PageLoad<PageData> = async ({ data }) => {
+    return {
+        messages: data.messages
+    };
+};

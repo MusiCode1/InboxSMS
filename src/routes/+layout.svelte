@@ -1,9 +1,10 @@
 <script>
     import '../app.css';
+    const { children } = $props();
 </script>
 
 <div dir="rtl" lang="he">
-    <slot />
+    {@render children()}
 </div>
 
 <style>
