@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The cube exercise</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding-top: 20px;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 40px;
+        }
+
+        .cube {
+            width: 100px;
+            height: 100px;
+            border: 4px solid #cc0000;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            transition: all 3s ease;
+            background-color: white;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .cube::before,
+        .cube::after {
+            position: absolute;
+            transition: opacity 3s ease;
+        }
+
+        .cube::before {
+            content: '1';
+            opacity: 1;
+        }
+
+        .cube::after {
+            content: '2';
+            opacity: 0;
+        }
+
+        .cube:hover {
+            transform: translate(400px, 400px) rotate(45deg) scale(2);
+            background-color: yellow;
+            border: 2px solid black;
+            border-radius: 20px;
+            box-shadow: 0 0 0 2px yellow,
+                       0 0 0 4px black;
+        }
+
+        .cube:hover::before {
+            opacity: 0;
+        }
+
+        .cube:hover::after {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>The cube exercise</h1>
+    <div class="cube"></div>
+</body>
+</html>
