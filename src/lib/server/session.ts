@@ -17,7 +17,8 @@ export async function createSession(userId: string): Promise<string> {
     authLogger.info({ sessionId, userId }, 'יצירת סשן חדש');
     
     // שמירת הסשן ב-Redis עם TTL
-    await redis.set(`session:${sessionId}`, JSON.stringify(sessionData), 'EX', SESSION_TTL);
+    await redis.set(`session:${sessionId}`, JSON.stringify(sessionData));
+    await redis.expire(`session:${sessionId}`, SESSION_TTL);
     
     return sessionId;
 }
