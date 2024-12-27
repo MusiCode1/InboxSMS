@@ -34,16 +34,26 @@ const apiClient = {
             body: JSON.stringify(body)
         });
 
-        const data: T = await response.json();
-        apiLogger.debug({ status: data.responseStatus }, `תשובת שרת ל${logPrefix}`);
+        try {
+            const data: T = await response.json();
+            apiLogger.debug({ status: data.responseStatus }, `תשובת שרת ל${logPrefix}`);
 
-        const result = extractResult(data);
-        if (data.responseStatus === 'OK' && result !== undefined) {
-            return result;
+            // בדיקה שהתשובה תקינה ומכילה את כל השדות הנדרשים
+            if (!data || typeof data !== 'object') {
+                throw new Error('תשובה לא תקינה מהשרת');
+            }
+
+            const result = extractResult(data);
+            if (data.responseStatus === 'OK' && result !== undefined) {
+                return result;
+            }
+
+            apiLogger.error({ error: data.message }, `שגיאה ב${logPrefix}`);
+            throw new Error(data.message || `שגיאה ב${logPrefix}`);
+        } catch (error) {
+            apiLogger.error({ error: error instanceof Error ? error.message : 'unknown error' }, `שגיאה בעיבוד תשובת ${logPrefix}`);
+            throw new Error(`שגיאה בעיבוד תשובת ${logPrefix}`);
         }
-
-        apiLogger.error({ error: data.message }, `שגיאה ב${logPrefix}`);
-        throw new Error(data.message || `שגיאה ב${logPrefix}`);
     },
 
     async login(): Promise<string> {
@@ -59,6 +69,8 @@ const apiClient = {
                     apiLogger.debug('התקבל טוקן חדש');
                     return data.token;
                 }
+                apiLogger.error('לא התקבל טוקן בתשובת השרת');
+                throw new Error('לא התקבל טוקן בתשובת השרת');
             }
         );
     },
@@ -71,7 +83,13 @@ const apiClient = {
                 limit: 100
             },
             'קבלת הודעות',
-            (data) => data.rows
+            (data) => {
+                if (Array.isArray(data.rows)) {
+                    return data.rows;
+                }
+                apiLogger.debug('לא התקבלו הודעות מהשרת');
+                return [];
+            }
         );
     }
 };

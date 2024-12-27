@@ -84,6 +84,7 @@ export const actions: Actions = {
             const token = await loginToApi();
             messages = await getMessagesFromApi(token);
             authLogger.info({ username }, 'התחברות הושלמה בהצלחה');
+            
         } catch (error) {
             authLogger.error({ error: error instanceof Error ? error.message : 'unknown error' }, 'שגיאה בהתחברות');
             return {
