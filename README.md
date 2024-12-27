@@ -4,16 +4,17 @@
 - **Frontend Framework**: SvelteKit 2 עם Svelte 5
 - **Styling**: TailwindCSS
 - **Type Safety**: TypeScript
-- **API Integration**: Fetch API
+- **API Integration**: Server-Side API Calls
 - **State Management**: Svelte 5 Runes ($state)
+- **Authentication**: Form Actions + Server-Side Sessions
 
 ## מבנה הפרוייקט
 
-### src/lib/api.ts
-מכיל את כל הלוגיקה של קריאות ה-API:
-- `login(username: string, password: string)` - התחברות למערכת וקבלת טוקן
-- `logout(token: string)` - התנתקות מהמערכת
-- `getMessages(token: string)` - קבלת הודעות SMS
+### src/routes/+page.server.ts
+מכיל את כל הלוגיקה של קריאות ה-API בצד שרת:
+- `loginToApi()` - התחברות למערכת וקבלת טוקן
+- `logoutFromApi()` - התנתקות מהמערכת
+- `getMessagesFromApi()` - קבלת הודעות SMS
 כל הפונקציות מתקשרות עם השרת בכתובת `https://www.call2all.co.il/ym/api/`
 
 ### src/lib/types.ts
@@ -48,23 +49,28 @@
 
 #### +page.svelte
 הדף הראשי של האפליקציה:
-- מנהל את מצב ההתחברות באמצעות $state
+- מנהל את מצב ההתחברות באמצעות Form Actions
 - מציג טופס התחברות או רשימת הודעות בהתאם למצב
 - מטפל בשגיאות ומציג הודעות למשתמש
 
+#### +page.server.ts
+לוגיקת צד שרת:
+- מנהל את קריאות ה-API
+- מנהל את הסשן והטוקן
+- מטפל בפעולות המשתמש (התחברות, התנתקות, רענון)
+
 ## ניהול State
 - שימוש ב-$state של Svelte 5 לניהול משתנים ריאקטיביים:
-  - `token` - טוקן ההתחברות
   - `messages` - רשימת ההודעות
-  - `username/password` - פרטי התחברות
   - `error` - הודעות שגיאה
+- שימוש בסשן בצד שרת לשמירת הטוקן
 
 ## פונקציונליות
 1. **התחברות**:
    - טופס עם שדות שם משתמש וסיסמה
    - תמיכה ב-autocomplete
    - הצגת שגיאות התחברות
-   - שמירת טוקן בזיכרון
+   - שמירת טוקן בסשן בצד שרת
 
 2. **הצגת הודעות**:
    - טעינה אוטומטית בהתחברות
@@ -76,13 +82,15 @@
    - עדכון אוטומטי של התצוגה
 
 4. **התנתקות**:
-   - ניקוי טוקן וזיכרון
+   - ניקוי טוקן וסשן
    - חזרה למסך התחברות
 
 ## אבטחה
-- שימוש בטוקן לאימות בקשות
+- קריאות API מתבצעות בצד שרת
+- שימוש בסשן לאחסון הטוקן
 - הצפנת סיסמה בתצוגה
 - ניקוי נתונים בהתנתקות
+- שכבת אבטחה נוספת עם שם משתמש וסיסמה למערכת
 
 ## עיצוב
 - שימוש ב-TailwindCSS לעיצוב מודרני ונקי
@@ -92,5 +100,22 @@
 
 ## הוראות הרצה
 1. התקנת תלויות: `npm install`
-2. הרצת שרת פיתוח: `npm run dev`
-3. גישה לאפליקציה בדפדפן: `http://localhost:5173` (או פורט אחר שיוקצה)
+2. הגדרת קובץ .env עם הפרטים הבאים:
+   ```
+   # API Credentials
+   API_USERNAME=your_api_username
+   API_PASSWORD=your_api_password
+
+   # Client Credentials
+   CLIENT_USERNAME=admin
+   CLIENT_PASSWORD=123456
+
+   # API URL
+   API_URL=https://www.call2all.co.il/ym/api/
+   ```
+3. הרצת שרת פיתוח: `npm run dev`
+4. גישה לאפליקציה בדפדפן: `http://localhost:5173`
+
+## פרטי התחברות למערכת
+- שם משתמש: admin
+- סיסמה: 123456
