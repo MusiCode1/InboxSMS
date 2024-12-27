@@ -1,9 +1,16 @@
-// See https://svelte.dev/docs/kit/types#app.d.ts
+// See https://kit.svelte.dev/docs/types#app
+// for information about these interfaces
 declare global {
 	namespace App {
+		// interface Error {}
 		interface Locals {
-			session?: string;
+			authenticated: boolean;
 		}
+		interface PageData {
+			messages: import('$lib/types').Message[];
+			authenticated: boolean;
+		}
+		// interface Platform {}
 	}
 }
 

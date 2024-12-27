@@ -7,6 +7,9 @@
 - **API Integration**: Server-Side API Calls
 - **State Management**: Svelte 5 Runes ($state)
 - **Authentication**: Form Actions + Server-Side Sessions
+- **Session Storage**: Redis
+- **Testing**: Playwright
+- **Logging**: Pino
 
 ## מבנה הפרוייקט
 
@@ -25,6 +28,13 @@
 
 ### src/lib/components/
 קומפוננטות משנה של האפליקציה:
+
+#### LoginForm.svelte
+קומפוננטת טופס התחברות:
+- מציגה שדות שם משתמש וסיסמה
+- תומכת ב-autocomplete
+- מטפלת בשגיאות התחברות
+- מעוצבת עם TailwindCSS
 
 #### Message.svelte
 קומפוננטה להצגת הודעת SMS בודדת:
@@ -85,12 +95,44 @@
    - ניקוי טוקן וסשן
    - חזרה למסך התחברות
 
+### src/lib/server/
+שירותי צד שרת:
+
+#### redis.ts
+מודול התחברות ל-Redis:
+- יצירת חיבור ל-Redis באמצעות Vercel KV
+- ניהול החיבור והתאוששות משגיאות
+
+#### session.ts
+מודול ניהול סשנים:
+- יצירת סשנים חדשים
+- שמירה ושליפה של נתוני סשן
+- ניקוי סשנים בהתנתקות
+
+#### logger.ts
+מודול לוגים עם Pino:
+- רישום פעולות משתמש
+- רישום שגיאות מערכת
+- לוגרים ייעודיים לכל רכיב (auth, db, api, redis)
+- פורמט מובנה ללוגים
+
+### src/lib/utils/
+כלי עזר:
+
+#### forms.ts
+עזרים לטיפול בטפסים:
+- ולידציה של שדות
+- טיפול בשגיאות
+- עיבוד נתונים
+
 ## אבטחה
 - קריאות API מתבצעות בצד שרת
-- שימוש בסשן לאחסון הטוקן
+- מערכת סשנים מבוססת Redis עם Vercel KV
+- הפרדה בין אימות משתמש לטוקן API
 - הצפנת סיסמה בתצוגה
 - ניקוי נתונים בהתנתקות
 - שכבת אבטחה נוספת עם שם משתמש וסיסמה למערכת
+- לוגים מפורטים של פעולות משתמש
 
 ## עיצוב
 - שימוש ב-TailwindCSS לעיצוב מודרני ונקי
@@ -99,8 +141,11 @@
 - התאמה למובייל (responsive)
 
 ## הוראות הרצה
+
+### סביבת פיתוח
 1. התקנת תלויות: `npm install`
-2. הגדרת קובץ .env עם הפרטים הבאים:
+2. הרצת טסטים: `npm test`
+3. הגדרת קובץ .env עם הפרטים הבאים:
    ```
    # API Credentials
    API_USERNAME=your_api_username
@@ -113,8 +158,33 @@
    # API URL
    API_URL=https://www.call2all.co.il/ym/api/
    ```
-3. הרצת שרת פיתוח: `npm run dev`
-4. גישה לאפליקציה בדפדפן: `http://localhost:5173`
+4. הרצת שרת פיתוח: `npm run dev`
+5. גישה לאפליקציה בדפדפן: `http://localhost:5173`
+
+## טסטים
+הפרויקט כולל מערכת טסטים מקיפה עם Playwright:
+
+### tests/login.spec.ts
+טסטים למערכת ההתחברות:
+- בדיקת התחברות תקינה
+- בדיקת שגיאות התחברות
+- בדיקת התנתקות
+
+### הרצת טסטים
+- הרצת כל הטסטים: `npm test`
+- הרצת טסט ספציפי: `npm test tests/login.spec.ts`
+- הרצה במצב UI: `npm run test:ui`
+
+### סביבת ייצור (Vercel)
+1. הגדרת Vercel KV (Redis):
+   - יצירת מופע Redis חדש ב-Vercel Dashboard
+   - העתקת פרטי החיבור (URL ו-Token) למשתני הסביבה:
+     ```
+     KV_REST_API_URL=your_kv_url
+     KV_REST_API_TOKEN=your_kv_token
+     ```
+2. העלאת הפרויקט ל-Vercel
+3. הגדרת כל משתני הסביבה ב-Vercel Dashboard
 
 ## פרטי התחברות למערכת
 - שם משתמש: admin
