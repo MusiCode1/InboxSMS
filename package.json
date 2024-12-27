@@ -18,6 +18,7 @@
     "@neoconfetti/svelte": "^2.0.0",
     "@playwright/test": "^1.49.1",
     "@sveltejs/adapter-node": "^5.2.9",
+    "@sveltejs/adapter-vercel": "^5.5.2",
     "@sveltejs/kit": "^2.0.0",
     "@sveltejs/vite-plugin-svelte": "^4.0.0",
     "@types/node": "^22.10.2",
