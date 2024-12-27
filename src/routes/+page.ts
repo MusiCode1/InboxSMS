@@ -6,7 +6,8 @@ export interface PageData {
     authenticated: boolean;
 }
 
-export const load: PageLoad<PageData> = async ({ data }) => {
+export const load: PageLoad<PageData> = async ({ data, depends }) => {
+    depends('app:auth');
     return {
         messages: data.messages,
         authenticated: data.authenticated

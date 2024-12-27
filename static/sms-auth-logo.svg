@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- רקע עיגול -->
+  <circle cx="100" cy="100" r="90" fill="#f0f9ff"/>
+  
+  <!-- מסגרת הטלפון -->
+  <rect x="60" y="40" width="80" height="120" rx="10" fill="#3b82f6" />
+  
+  <!-- מסך -->
+  <rect x="65" y="45" width="70" height="110" rx="5" fill="white"/>
+  
+  <!-- סמל מנעול -->
+  <path d="M95 85 h10 v-10 a5,5 0 0,0 -10,0 z" fill="#1e40af"/>
+  <rect x="90" y="85" width="20" height="15" rx="2" fill="#1e40af"/>
+  
+  <!-- בועת הודעה -->
+  <path d="M75 110 h50 v25 h-40 l-10 10 z" fill="#dbeafe"/>
+  
+  <!-- נקודות -->
+  <circle cx="85" cy="122" r="2" fill="#3b82f6"/>
+  <circle cx="95" cy="122" r="2" fill="#3b82f6"/>
+  <circle cx="105" cy="122" r="2" fill="#3b82f6"/>
+</svg>
