@@ -24,15 +24,23 @@ const redis = dev
           ...baseRedis,
           get: async (key: string) => {
               redisLogger.debug({ operation: 'GET', key }, 'Redis operation');
-              return await baseRedis.get(key);
+              const result = await baseRedis.get(key);
+              // המרה לסטרינג אם התוצאה היא אובייקט
+              return result && typeof result === 'object' ? JSON.stringify(result) : result;
           },
           set: async (key: string, value: string | number | Buffer) => {
               redisLogger.debug({ operation: 'SET', key, value }, 'Redis operation');
-              return await baseRedis.set(key, value);
+              // וידוא שהערך הוא סטרינג
+              const stringValue = typeof value === 'object' ? JSON.stringify(value) : value.toString();
+              return await baseRedis.set(key, stringValue);
           },
           del: async (key: string) => {
               redisLogger.debug({ operation: 'DEL', key }, 'Redis operation');
               return await baseRedis.del(key);
+          },
+          expire: async (key: string, seconds: number) => {
+              redisLogger.debug({ operation: 'EXPIRE', key, seconds }, 'Redis operation');
+              return await baseRedis.expire(key, seconds);
           }
       }
     : baseRedis;

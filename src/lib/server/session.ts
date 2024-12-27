@@ -26,24 +26,37 @@ export async function createSession(userId: string): Promise<string> {
 export async function getSession(sessionId: string): Promise<SessionData | null> {
     authLogger.debug({ sessionId }, 'קבלת סשן');
     
-    const data = await redis.get(`session:${sessionId}`);
-    if (!data) {
-        authLogger.debug('סשן לא נמצא');
+    try {
+        const data = await redis.get(`session:${sessionId}`);
+        if (!data) {
+            authLogger.debug('סשן לא נמצא');
+            return null;
+        }
+        
+        // בדיקה אם הנתונים כבר מפורסרים
+        const session = typeof data === 'string' ? JSON.parse(data) : data as SessionData;
+        const now = Math.floor(Date.now() / 1000);
+
+        // בדיקה שהסשן מכיל את כל השדות הנדרשים
+        if (!session || typeof session !== 'object' || !session.userId || !session.expiresAt) {
+            authLogger.error({ sessionId }, 'נתוני סשן לא תקינים');
+            await deleteSession(sessionId);
+            return null;
+        }
+
+        // בדיקת תוקף הסשן
+        if (session.expiresAt < now) {
+            authLogger.debug({ sessionId }, 'סשן פג תוקף');
+            await deleteSession(sessionId);
+            return null;
+        }
+        
+        authLogger.debug({ sessionId, userId: session.userId }, 'סשן תקין');
+        return session;
+    } catch (error) {
+        authLogger.error({ error: error instanceof Error ? error.message : 'unknown error', sessionId }, 'שגיאה בקריאת נתוני סשן');
         return null;
     }
-    
-    const session = JSON.parse(data as string) as SessionData;
-    const now = Math.floor(Date.now() / 1000);
-    
-    // בדיקת תוקף הסשן
-    if (session.expiresAt < now) {
-        authLogger.debug({ sessionId }, 'סשן פג תוקף');
-        await deleteSession(sessionId);
-        return null;
-    }
-    
-    authLogger.debug({ sessionId, userId: session.userId }, 'סשן תקין');
-    return session;
 }
 
 export async function deleteSession(sessionId: string): Promise<void> {
